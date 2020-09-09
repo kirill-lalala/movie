@@ -28,3 +28,12 @@ export const CONFIGURATION_API = {
     return await fetch(`${URL}${queryParams}`).then((res) => res.json());
   },
 };
+
+export const GENRE_API = {
+  GET: async () => {
+    const queryParams = queryString(defaultQuery);
+    const URL = `${BASE_URL}genre/movie/list`;
+
+    return await fetch(`${URL}${queryParams}`).then((res) => res.json());
+  },
+};

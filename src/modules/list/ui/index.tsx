@@ -3,9 +3,15 @@ import cn from "classnames";
 import * as S from "./styles";
 import MovieListItem from "./componens/movie-list-item";
 import PaginationControls from "../../ud-ui/pagination-controls";
-import { loadData } from "../store";
+import { loadData, loadGenres } from "../store";
 import SortArrows from "./componens/sort-arrows";
-import { Link, Router } from "react-router-dom";
+import Select from "../../ud-ui/select";
+import { getGenres } from "../helpers/get-genres";
+
+export type Filters = {
+  sort_by: string;
+  with_genres?: number;
+};
 
 const headerTableData = [
   {
@@ -25,7 +31,19 @@ const MoviesList = () => {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setLoading] = useState(false);
-  const [currentSort, changeCurrentSort] = useState("original_title.asc");
+  const [filters, changeFilters] = useState<Filters>({
+    sort_by: "original_title.asc",
+  });
+
+  const changeFilter = useCallback((key: keyof Filters) => {
+    return (value: any) => {
+      changeFilters((prev) => {
+        const updatedFilters = { ...prev, [key]: value };
+        getMovies(updatedFilters);
+        return updatedFilters;
+      });
+    };
+  }, []);
 
   const onSuccessFetchData = useCallback((res) => {
     const { results, page, total_pages } = res;
@@ -38,19 +56,30 @@ const MoviesList = () => {
     async (options = {}) => {
       try {
         setLoading(true);
-        await loadData({
-          sort_by: currentSort,
-          ...options,
-        }).then(onSuccessFetchData);
+        const [data] = await Promise.all([
+          loadData({
+            ...filters,
+            ...options,
+          }),
+          loadGenres(),
+        ]);
+        await onSuccessFetchData(data);
       } finally {
         setLoading(false);
       }
     },
-    [currentSort]
+    [JSON.stringify(filters)]
   );
 
   useEffect(() => {
     getMovies();
+  }, []);
+
+  const onGenreChange = useCallback((id) => {
+    changeFilter("with_genres")(id);
+  }, []);
+  const onChangeSort = useCallback((key: string) => {
+    changeFilter("sort_by")(key);
   }, []);
 
   const containerCN = cn("container", {
@@ -59,6 +88,12 @@ const MoviesList = () => {
 
   return (
     <S.Container className={containerCN}>
+      <Select
+        label={"Genres"}
+        options={getGenres()}
+        onChange={onGenreChange}
+        value={filters?.with_genres}
+      />
       <table className="table">
         <thead>
           <tr>
@@ -68,10 +103,9 @@ const MoviesList = () => {
                   {item.title}
                   {!!item.sortBy && (
                     <SortArrows
-                      load={getMovies}
                       sortBy={item.sortBy}
-                      changeSort={changeCurrentSort}
-                      currentSort={currentSort}
+                      changeSort={onChangeSort}
+                      currentSort={filters.sort_by}
                     />
                   )}
                 </S.ThContent>

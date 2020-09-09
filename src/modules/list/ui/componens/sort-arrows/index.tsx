@@ -3,7 +3,6 @@ import * as S from "./styles";
 import Icon from "../../../../ud-ui/icon";
 
 type MovieProps = {
-  load: (option?: object) => Promise<any>;
   sortBy: "original_title";
   changeSort: (arg: string) => void;
   currentSort: string;
@@ -12,14 +11,11 @@ type MovieProps = {
 const icons = [{ direction: "asc" }, { direction: "desc" }];
 
 const SortArrows: FunctionComponent<MovieProps> = (props) => {
-  const { load, sortBy, changeSort, currentSort } = props;
+  const { sortBy, changeSort, currentSort } = props;
 
   const onAscArrowClick = useCallback((direction: string) => {
     const sortDirection = `${sortBy}.${direction}`;
     changeSort(sortDirection);
-    load({
-      sort_by: sortDirection,
-    });
   }, []);
 
   let ascIconName: "sort-arrow" | "sort-arrow-active" = "sort-arrow";
