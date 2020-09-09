@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useCallback } from "react";
 import cn from "classnames";
 import * as S from "./styles";
-import Movie from "./componens/movie";
+import MovieListItem from "./componens/movie-list-item";
 import PaginationControls from "../../ud-ui/pagination-controls";
 import { loadData } from "../store";
 import SortArrows from "./componens/sort-arrows";
+import { Link, Router } from "react-router-dom";
 
 const headerTableData = [
   {
@@ -80,7 +81,7 @@ const MoviesList = () => {
         </thead>
         <tbody>
           {data.map((movie: any) => (
-            <Movie {...movie} key={movie.id} />
+            <MovieListItem {...movie} key={movie.id} />
           ))}
         </tbody>
       </table>
