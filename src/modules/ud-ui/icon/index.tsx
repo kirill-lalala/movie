@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from "react";
 
 type IconProps = {
-  name: "not-favorite" | "favorite";
+  name: "not-favorite" | "favorite" | "sort-arrow" | "sort-arrow-active";
   onClick?: () => void;
 };
 

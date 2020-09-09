@@ -1,8 +1,13 @@
 import styled from "styled-components";
-
-export const PaginationControls = styled.div`
-  display: flex;
-  justify-content: center;
-`;
+import Icon from "../../ud-ui/icon";
 
 export const Container = styled.div``;
+
+export const Th = styled.th`
+  vertical-align: baseline !important;
+`;
+
+export const ThContent = styled.div`
+  display: flex;
+  align-items: center;
+`;
