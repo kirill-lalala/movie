@@ -1,14 +1,9 @@
-import React, {
-  FunctionComponent,
-  ChangeEvent,
-  useCallback,
-  useMemo,
-} from "react";
-import { Genre } from "../../list/helpers/get-genres";
+import React, { FunctionComponent, useCallback, useMemo } from "react";
+import { Genre } from "../../list/store";
 
 type SelectProps = {
   label: string;
-  options: Array<Genre>;
+  options?: Array<Genre>;
   onChange?: (id: number) => void;
   value?: number;
 };
@@ -21,10 +16,15 @@ const Select: FunctionComponent<SelectProps> = (props) => {
   ]);
   const name = selectedOption?.name;
 
-  const onSelectChange = useCallback((e) => {
-    const { id } = options.find(({ name }) => name === e.target.value) as Genre;
-    onChange && onChange(id);
-  }, []);
+  const onSelectChange = useCallback(
+    (e) => {
+      const option = options.find(
+        ({ name }) => name === e.target.value
+      ) as Genre;
+      onChange && onChange(option?.id);
+    },
+    [JSON.stringify(options), name]
+  );
 
   return (
     <>

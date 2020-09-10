@@ -8,20 +8,24 @@ type State = {
   poster_path: string;
   original_title: string;
   overview: string;
+  config: any;
 };
 
-const getImageSrc = (path: string) => {
-  const { images } = JSON.parse(localStorage.getItem("config") as string);
-  const { base_url, poster_sizes } = images;
-  return `${base_url}${poster_sizes[4]}${path}`;
+const getImageSrc = (config: any, path: string) => {
+  if (config) {
+    const { images } = config;
+    const { base_url, poster_sizes } = images;
+    return `${base_url}${poster_sizes[4]}${path}`;
+  }
+  return "";
 };
 
 const Movie: FunctionComponent<MovieProps> = () => {
   const history = useHistory();
   const { state } = useLocation<State>();
-  const { poster_path, original_title, overview } = state;
+  const { poster_path, original_title, overview, config } = state;
 
-  const src = getImageSrc(poster_path);
+  const src = getImageSrc(config, poster_path);
 
   const onButtonClick = useCallback(() => {
     history.goBack();

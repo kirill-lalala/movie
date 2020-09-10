@@ -3,42 +3,61 @@ import cn from "classnames";
 import * as S from "./styles";
 import MovieListItem from "./componens/movie-list-item";
 import PaginationControls from "../../ud-ui/pagination-controls";
-import { loadData, loadGenres } from "../store";
+import { loadMoviesData, loadGenres, Genre } from "../store";
 import SortArrows from "./componens/sort-arrows";
 import Select from "../../ud-ui/select";
-import { getGenres } from "../helpers/get-genres";
 
 export type Filters = {
   sort_by: string;
   with_genres?: number;
 };
 
+type MoviesListProps = {
+  config: any;
+};
+
 const headerTableData = [
   {
-    title: "Название",
+    title: "Обложка",
   },
   {
-    title: "Обложка",
+    title: "Название",
     sortBy: "original_title",
+  },
+  {
+    title: "Популярность",
+    sortBy: "popularity",
+  },
+  {
+    title: "Рейтинг",
+    sortBy: "vote_average",
+  },
+  {
+    title: "Дата релиза",
+    sortBy: "primary_release",
   },
   {
     title: "Избранное",
   },
 ];
 
-const MoviesList = () => {
+const MoviesList = (props: MoviesListProps) => {
+  const { config } = props;
+
   const [data, setData] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setLoading] = useState(false);
+  const [genres, setGenres] = useState<Genre[] | undefined>(undefined);
   const [filters, changeFilters] = useState<Filters>({
-    sort_by: "original_title.asc",
+    sort_by: "popularity.desc",
   });
 
   const changeFilter = useCallback((key: keyof Filters) => {
     return (value: any) => {
       changeFilters((prev) => {
-        const updatedFilters = { ...prev, [key]: value };
+        let updatedFilters = { ...prev, [key]: value };
+        if (value == null) delete updatedFilters[key];
         getMovies(updatedFilters);
         return updatedFilters;
       });
@@ -56,13 +75,10 @@ const MoviesList = () => {
     async (options = {}) => {
       try {
         setLoading(true);
-        const [data] = await Promise.all([
-          loadData({
-            ...filters,
-            ...options,
-          }),
-          loadGenres(),
-        ]);
+        const data = await loadMoviesData({
+          ...filters,
+          ...options,
+        });
         await onSuccessFetchData(data);
       } finally {
         setLoading(false);
@@ -73,6 +89,9 @@ const MoviesList = () => {
 
   useEffect(() => {
     getMovies();
+    loadGenres().then((genres) => {
+      setGenres(genres);
+    });
   }, []);
 
   const onGenreChange = useCallback((id) => {
@@ -90,11 +109,11 @@ const MoviesList = () => {
     <S.Container className={containerCN}>
       <Select
         label={"Genres"}
-        options={getGenres()}
+        options={genres}
         onChange={onGenreChange}
         value={filters?.with_genres}
       />
-      <table className="table">
+      <table className="table table-striped">
         <thead>
           <tr>
             {headerTableData.map((item: any) => (
@@ -115,7 +134,7 @@ const MoviesList = () => {
         </thead>
         <tbody>
           {data.map((movie: any) => (
-            <MovieListItem {...movie} key={movie.id} />
+            <MovieListItem {...movie} key={movie.id} config={config} />
           ))}
         </tbody>
       </table>

@@ -5,14 +5,25 @@ import * as S from "./styles";
 
 type MovieProps = any;
 
-const getImageSrc = (path: string) => {
-  const { images } = JSON.parse(localStorage.getItem("config") as string);
-  const { base_url, poster_sizes } = images;
-  return `${base_url}${poster_sizes[0]}${path}`;
+const getImageSrc = (config: any, path: string) => {
+  if (config) {
+    const { images } = config;
+    const { base_url, poster_sizes } = images;
+    return `${base_url}${poster_sizes[0]}${path}`;
+  }
+  return "";
 };
 
 const MovieListItem: FunctionComponent<MovieProps> = (props) => {
-  const { poster_path, original_title, id } = props;
+  const {
+    poster_path,
+    original_title,
+    popularity,
+    vote_average,
+    release_date,
+    id,
+    config,
+  } = props;
 
   const history = useHistory();
 
@@ -20,11 +31,11 @@ const MovieListItem: FunctionComponent<MovieProps> = (props) => {
 
   const iconName = favoriteIds.includes(id) ? "favorite" : "not-favorite";
 
-  const src = getImageSrc(poster_path);
+  const src = getImageSrc(config, poster_path);
 
   const onRowClick = useCallback(() => {
-    history.push(`/${id}`, props);
-  }, [id, JSON.stringify(props)]);
+    history.push(`/${id}`, { ...props, ...config });
+  }, [id, JSON.stringify(props), JSON.stringify(config)]);
 
   const onToggleFavoriteClick = useCallback(
     (id: number): void => {
@@ -45,8 +56,17 @@ const MovieListItem: FunctionComponent<MovieProps> = (props) => {
         <img src={src} alt={original_title} />
       </td>
       <td>{original_title}</td>
+      <td>{popularity}</td>
+      <td>{vote_average}</td>
+      <td>{release_date}</td>
       <td>
-        <Icon name={iconName} onClick={() => onToggleFavoriteClick(id)} />
+        <Icon
+          name={iconName}
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleFavoriteClick(id);
+          }}
+        />
       </td>
     </S.Tr>
   );
